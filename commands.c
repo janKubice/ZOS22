@@ -134,6 +134,9 @@ int cd(vfs *vfs, char *s) {
     directory_item *next = NULL;
     next = vfs->all_elements;
 
+    if (next == NULL){
+        return -1;
+    }
 
     while (next != NULL)
     {
@@ -344,6 +347,13 @@ int cat(vfs *vfs, char *name) {
 
 
 int mv(vfs *vfs, directory_item *s1, char *s2) {
+    if (vfs == NULL){
+        return -1
+    }
+
+    if (s1 == NULL || s2 == NULL){
+        return -1;
+    }
 
 
     if(strcmp(s1->parent_name, vfs->current->item_name) == 0) {
