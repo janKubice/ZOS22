@@ -12,7 +12,7 @@ int main(int argc, char const *argv[])
 {
 	
 	FILE *fp = NULL;
-    vfs *vfs = NULL;
+    vfs_t *vfs = NULL;
     char *input_argument = NULL;
     size_t len_a = 0, len_r = 0;
     char *unit = NULL;
@@ -54,7 +54,6 @@ int main(int argc, char const *argv[])
                     current = current->next_element;
                 }
                 
-
                 vfs->file = argv[1];
 
                 while(continue_w) {
@@ -66,25 +65,13 @@ int main(int argc, char const *argv[])
                 printf("Soubor s filesystemem nebyl nalezen,spustime funkci format pro tvorbu filesystemu\n");
                 printf("Velikost jednosho clusteru je 5000B\n");
                 printf("Zadejte velikost disku ve formatu <velikost> <MB,GB>: ");
-                /*getline(&input_argument, &len_a, stdin);*/
                 scanf("%s", &input_argument);
-                size_t i = 0;
-                for (i = 0; i < strlen(input_argument); i++)
-                {
-                    if((input_argument[i] == 'M')) {
-                        unit = (char *)malloc(sizeof(char) * i);
-                        size = atoi(strncpy(unit, input_argument, i));
-                        size = size * 1000000;
-                        break;
-                    }
-                    if((input_argument[i] == 'G')) {
-                        unit = (char *)malloc(sizeof(char) * i);
-                        size = atoi(strncpy(unit, input_argument, i));
-                        size = size * 1000000000;
-                        break;
-                    }
-                }
+                size_t  i = 0;
+
+                /*TODO udělat parse funkci na na zadání velikosti*/
+                size = 50 * 1000000;
                 
+                free(unit);
                 vfs = init_vfs(vfs, size);
 
                 if(vfs != NULL) {

@@ -1,7 +1,7 @@
 #include "commands.h"
 
 
-int ls(vfs *vfs, directory_item *current) {
+int ls(vfs_t *vfs, directory_item *current) {
 
     directory_item *node = NULL;
 
@@ -60,7 +60,7 @@ int ls(vfs *vfs, directory_item *current) {
     return 0;
 }
 
-int pwd(vfs *vfs) {
+int pwd(vfs_t *vfs) {
 
     size_t total_len = 0;
     char *path = NULL;
@@ -101,7 +101,7 @@ int pwd(vfs *vfs) {
     return 0;
 }
 
-int mkdir(vfs *vfs, char *name) {
+int mkdir(vfs_t *vfs, char *name) {
     
     directory_item *current = NULL;
     int index = 0;
@@ -126,49 +126,40 @@ int mkdir(vfs *vfs, char *name) {
     return 0;
 }
 
-int cd(vfs *vfs, char *s) {
-    if (vfs == NULL || s == NULL){
-        return -1;
-    }
+int cd(vfs_t *vfs, char *name) {
 
     directory_item *next = NULL;
+
     next = vfs->all_elements;
 
-    if (next == NULL){
-        return -1;
-    }
 
     while (next != NULL)
     {
-        if(strcmp(s, "..") == 0) {
+        if(strcmp(name, "..") == 0) {
 
-            if(strcmp(vfs->current->item_name, "root") == 0) 
-            {
+            if(strcmp(vfs->current->item_name, "root") == 0) {
                 vfs->current = vfs->current;
                 return 0;
-            } 
-            else {
-                if(strcmp(next->item_name, vfs->current->parent_name) == 0) 
-                {
+            } else {
+                if(strcmp(next->item_name, vfs->current->parent_name) == 0) {
                     vfs->current = next;
                     return 0;
                 }
             }
-        } 
-        else {
-            if(strcmp(next->item_name, s) == 0 && strcmp(next->parent_name, vfs->current->item_name) == 0) 
-            {
+        } else {
+            if(strcmp(next->item_name, name) == 0 && strcmp(next->parent_name, vfs->current->item_name) == 0) {
                 vfs->current = next;
                 return 0;
             }
         }
+        
         next = next->next_element;
     }
     
     return -1;
 }
 
-int rmdir(vfs *vfs, char *name) {
+int rmdir(vfs_t *vfs, char *name) {
 
     int count = 0;
     directory_item *choose = NULL;
@@ -204,21 +195,20 @@ int rmdir(vfs *vfs, char *name) {
 
 }
 
-int rm(vfs *vfs, char *s) {
+int rm(vfs_t *vfs, char *name) {
 
     int index = 0;
     int index_previus = 0;
     directory_item *choose = NULL;
     directory_item *previus = NULL;
 
-    choose = search_file(vfs, s);
+    choose = search_file(vfs, name);
 
     if(choose != NULL) {
 
         printf("%d\n", choose->start_cluster);
 
-        int i = 0;
-        for (i = 0; i < CLUSTER_SIZE; i++)
+        for (int i = 0; i < CLUSTER_SIZE; i++)
         {
             vfs->data_block[choose->start_cluster][i] = '\0';
         }
@@ -228,8 +218,9 @@ int rm(vfs *vfs, char *s) {
         index_previus = index;
         while (index != FAT_FILE_END)
         {
-            int i = 0;
-            for (i = 0; i < CLUSTER_SIZE; i++)
+            
+
+            for (int i = 0; i < CLUSTER_SIZE; i++)
             {
                 vfs->data_block[index][i] = '\0';
             }
@@ -253,7 +244,7 @@ int rm(vfs *vfs, char *s) {
 
 }
 
-int info(vfs *vfs, char *name) {
+int info(vfs_t *vfs, char *name) {
 
     directory_item *choose = NULL;
     int index = 0;
@@ -306,7 +297,7 @@ int info(vfs *vfs, char *name) {
 
 }
 
-int cat(vfs *vfs, char *name) {
+int cat(vfs_t *vfs, char *name) {
 
     directory_item *choose = NULL;
     int index = 0;
@@ -314,8 +305,7 @@ int cat(vfs *vfs, char *name) {
     choose = search_file(vfs, name);
     if(choose != NULL) {
 
-        size_t i = 0;
-        for (i = 0; i < CLUSTER_SIZE; i++)
+        for (size_t i = 0; i < CLUSTER_SIZE; i++)
         {
 
             printf("%c", vfs->data_block[choose->start_cluster][i]);
@@ -325,8 +315,7 @@ int cat(vfs *vfs, char *name) {
         index = vfs->fat_table1[choose->start_cluster];
         while (index != FAT_FILE_END)
         {
-            size_t i = 0;
-            for (i = 0; i < CLUSTER_SIZE; i++)
+            for (size_t i = 0; i < CLUSTER_SIZE; i++)
             {
                     
                 printf("%c", vfs->data_block[index][i]);
@@ -346,31 +335,24 @@ int cat(vfs *vfs, char *name) {
 }
 
 
-int mv(vfs *vfs, directory_item *s1, char *s2) {
-    if (vfs == NULL){
-        return -1;
-    }
-
-    if (s1 == NULL || s2 == NULL){
-        return -1;
-    }
+int mv(vfs_t *vfs, directory_item *one, char *name_two) {
 
 
-    if(strcmp(s1->parent_name, vfs->current->item_name) == 0) {
+    if(strcmp(one->parent_name, vfs->current->item_name) == 0) {
 
-        strcpy(s1->item_name, s2);
+        strcpy(one->item_name, name_two);
         printf("OK\n");
         return 0;   
     } else {
-        strcpy(s1->parent_name, vfs->current->item_name);
-        strcpy(s1->item_name, s2);
+        strcpy(one->parent_name, vfs->current->item_name);
+        strcpy(one->item_name, name_two);
         printf("OK\n");
         return 0;
     }
 
 }
 
-int cp(vfs *vfs, directory_item *one, char *name_two) {
+int cp(vfs_t *vfs, directory_item *one, char *name_two) {
 
     directory_item *current = NULL;
     int index = 0;
@@ -506,7 +488,7 @@ int cp(vfs *vfs, directory_item *one, char *name_two) {
     return -1;
 }
 
-int incp(vfs *vfs, char *input_file, char *file_name) {
+int incp(vfs_t *vfs, char *input_file, char *file_name) {
 
 
     FILE *fp = NULL;
@@ -565,8 +547,7 @@ int incp(vfs *vfs, char *input_file, char *file_name) {
     current->next_element->next_element = NULL;
     index_previus = index;
 
-    int i = 0;
-    for (i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         vfs->data_block[index][counter] = file[i];
 
@@ -590,7 +571,7 @@ int incp(vfs *vfs, char *input_file, char *file_name) {
 
 }
 
-int outcp(vfs *vfs, char *file_name, char *output_file) {
+int outcp(vfs_t *vfs, char *file_name, char *output_file) {
 
     FILE *fp = NULL;
     int index = 0;
@@ -608,8 +589,7 @@ int outcp(vfs *vfs, char *file_name, char *output_file) {
 
     index = current->start_cluster;
 
-    int i = 0;
-    for (i = 0; i < current->size; i++)
+    for (int i = 0; i < current->size; i++)
     {
         file[i] = vfs->data_block[index][counter];
 
@@ -632,7 +612,7 @@ int outcp(vfs *vfs, char *file_name, char *output_file) {
     return 0;
 }
 
-int shortf(vfs *vfs, char *name) {
+int shortf(vfs_t *vfs, char *name) {
 
     directory_item  *current = NULL;
     int index = 0;
@@ -661,7 +641,7 @@ int shortf(vfs *vfs, char *name) {
 
 }
 
-int xcp(vfs *vfs, directory_item *one, directory_item *two, char *name) {
+int xcp(vfs_t *vfs, directory_item *one, directory_item *two, char *name) {
 
     directory_item *current = NULL;
     int index = 0;
@@ -748,7 +728,7 @@ int xcp(vfs *vfs, directory_item *one, directory_item *two, char *name) {
 
 }
 
-int load(vfs *vfs, char *file_name) {
+int load(vfs_t *vfs, char *file_name) {
     
     FILE *fp = NULL;
     char line[1024] = { 0 };
@@ -1173,7 +1153,7 @@ int load(vfs *vfs, char *file_name) {
     
 }
 
-vfs *format(vfs *vfs, int size) {
+vfs_t *format(vfs_t *vfs, int size) {
 
     directory_item *current = NULL;
     directory_item *free_directory = NULL;
@@ -1187,8 +1167,7 @@ vfs *format(vfs *vfs, int size) {
     free(vfs->fat_table2);
     vfs->fat_table2 = NULL;
 
-    int i = 0;
-    for (i = 0; i < vfs->superblock->fat_count; i++)
+    for (int i = 0; i < vfs->superblock->fat_count; i++)
     {
         memset(vfs->data_block[i], 0, sizeof(char) * CLUSTER_SIZE);
         free(vfs->data_block[i]);
@@ -1244,8 +1223,7 @@ vfs *format(vfs *vfs, int size) {
         return NULL;
     }
 
-    i = 0;
-    for (i = 0; i < vfs->superblock->fat_count; i++) {
+    for (int i = 0; i < vfs->superblock->fat_count; i++) {
 
         fat_table1[i] = FAT_UNUSED;
         fat_table2[i] = FAT_UNUSED;
@@ -1257,8 +1235,7 @@ vfs *format(vfs *vfs, int size) {
     }
     memset(data_block, 0, vfs->superblock->fat_count * sizeof(char *));
     
-    i = 0;
-    for (i = 0; i < vfs->superblock->fat_count; i++)
+    for (int i = 0; i < vfs->superblock->fat_count; i++)
     {
         data_block[i] = (char *)malloc(sizeof(char) * CLUSTER_SIZE);
         if(data_block[i] == NULL) {
@@ -1300,7 +1277,7 @@ vfs *format(vfs *vfs, int size) {
     return vfs;
 }
 
-int exit_fs(vfs *vfs, bool *continue_w) {
+int exit_fs(vfs_t *vfs, bool *continue_w) {
     
     *continue_w = false;
     directory_item *direct;
@@ -1313,8 +1290,7 @@ int exit_fs(vfs *vfs, bool *continue_w) {
     fwrite(vfs->fat_table1, sizeof(int), vfs->superblock->fat_count, fp);
     fwrite(vfs->fat_table2, sizeof(int), vfs->superblock->fat_count, fp);
 
-    int i = 0;
-    for (i = 0; i < vfs->superblock->fat_count; i++)
+    for (int i = 0; i < vfs->superblock->fat_count; i++)
     {
         fwrite(vfs->data_block[i], sizeof(char), CLUSTER_SIZE, fp);
     }
