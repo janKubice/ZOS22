@@ -2,61 +2,49 @@
 
 
 int ls(vfs_t *vfs, directory_item *current) {
-
-    directory_item *node = NULL;
-
-    if(!current || !vfs) {
+    if(!current || !vfs)
+    {
         printf("ERROR!!\n");
         return -1;
     }
 
+    directory_item *node = NULL;
     node = vfs->all_elements;
 
     printf("Aktualni slozka: %s\n", current->item_name);
 
-    if(strcmp(current->item_name, "root") != 0) {
+    if(strcmp(current->item_name, "root") != 0) 
+    {
         printf("Nadrazena slozka: %s\n", current->parent_name);
     }
 
     printf("Podadresare:");
     while (node != NULL)
-    {
-        
-        if((strcmp(node->parent_name, current->item_name) == 0) && (node->isFile == false)) {
-
-            if((strcmp(node->item_name, current->item_name) != 0) && (strcmp(node->item_name, current->parent_name) != 0)) {
-                
+    {   
+        if((strcmp(node->parent_name, current->item_name) == 0) && (node->isFile == false)) 
+        {
+            if((strcmp(node->item_name, current->item_name) != 0) && (strcmp(node->item_name, current->parent_name) != 0)) 
+            {  
                 printf("%s, ", node->item_name);
             }
         }
-
-
-        node = node->next_element;
-
-        
+        node = node->next_element;  
     }
-    printf("\n");
 
-    printf("Soubory:");
+    printf("\nSoubory:");
 
     node = vfs->all_elements;
 
     while (node != NULL)
     {
-        
-        if((strcmp(node->parent_name, current->item_name) == 0) && (node->isFile == true)) {
- 
+        if((strcmp(node->parent_name, current->item_name) == 0) && (node->isFile == true)) 
+        {
             printf("%s, ", node->item_name);
         }
-
-
-        node = node->next_element;
-
-        
+        node = node->next_element;  
     }
 
     printf("\n");
-
     return 0;
 }
 
@@ -77,7 +65,6 @@ int pwd(vfs_t *vfs) {
     strcat(path, vfs->current->item_name);
 
     if(strcmp(vfs->current->item_name, "root") != 0) {
-
         up_folder = vfs->current;
 
         while (strcmp(up_folder->parent_name, "root") != 0)
@@ -101,7 +88,6 @@ int pwd(vfs_t *vfs) {
     }
 
     printf("Path: %s\n", path);
-    
     return 0;
 }
 
@@ -136,36 +122,36 @@ int mkdir(vfs_t *vfs, char *name) {
 }
 
 int cd(vfs_t *vfs, char *name) {
-    if (!vfs | !name) {
+    if (!vfs | !name) 
+    {
         printf("ERROR!!");
         return -1;
     }
 
     directory_item *next = NULL;
-
     next = vfs->all_elements;
-
 
     while (next != NULL)
     {
         if(strcmp(name, "..") == 0) {
-
-            if(strcmp(vfs->current->item_name, "root") == 0) {
+            if(strcmp(vfs->current->item_name, "root") == 0) 
+            {
                 vfs->current = vfs->current;
                 return 0;
             } else {
-                if(strcmp(next->item_name, vfs->current->parent_name) == 0) {
+                if(strcmp(next->item_name, vfs->current->parent_name) == 0) 
+                {
                     vfs->current = next;
                     return 0;
                 }
             }
         } else {
-            if(strcmp(next->item_name, name) == 0 && strcmp(next->parent_name, vfs->current->item_name) == 0) {
+            if(strcmp(next->item_name, name) == 0 && strcmp(next->parent_name, vfs->current->item_name) == 0) 
+            {
                 vfs->current = next;
                 return 0;
             }
-        }
-        
+        }      
         next = next->next_element;
     }
     
@@ -173,7 +159,8 @@ int cd(vfs_t *vfs, char *name) {
 }
 
 int rmdir(vfs_t *vfs, char *name) {
-    if (!vfs | !name) {
+    if (!vfs | !name) 
+    {
         printf("ERROR!!");
         return -1;
     }
@@ -182,38 +169,36 @@ int rmdir(vfs_t *vfs, char *name) {
     directory_item *choose = NULL;
     directory_item *previus = NULL;
 
-    if(strcmp(name, "root") != 0) {
-
+    if(strcmp(name, "root") != 0) 
+    {
         choose = search_directory(vfs, name);
-
         if(choose != NULL) {
-            
             count = count_of_dir(vfs, choose->item_name);
-            if(count == 0) {
+            if(count == 0) 
+            {
                 vfs->fat_table1[choose->start_cluster] = FAT_UNUSED;
                 previus = previus_dir(vfs, choose->item_name);
                 previus->next_element = choose->next_element;
                 free(choose);
                 choose = NULL;
                 return 0;
-            } else {
+            } else 
+            {
                 return -1;
             }
-
         }
 
-    } else {
-        
+    } else 
+    {    
         return -2;
-
     }
-
     return -3;
 
 }
 
 int rm(vfs_t *vfs, char *name) {
-    if (!vfs | !name) {
+    if (!vfs | !name)
+     {
         printf("ERROR!!");
         return -1;
     }
@@ -226,7 +211,6 @@ int rm(vfs_t *vfs, char *name) {
     choose = search_file(vfs, name);
 
     if(choose != NULL) {
-
         printf("%d\n", choose->start_cluster);
 
         int i = 0;
@@ -239,8 +223,7 @@ int rm(vfs_t *vfs, char *name) {
         vfs->fat_table1[choose->start_cluster] = FAT_UNUSED;
         index_previus = index;
         while (index != FAT_FILE_END)
-        {
-            
+        {           
             int c = 0;
             for (c = 0; c < CLUSTER_SIZE; c++)
             {
@@ -251,8 +234,7 @@ int rm(vfs_t *vfs, char *name) {
             vfs->fat_table1[index_previus] = FAT_UNUSED;
             index_previus = index;
         }
-
-        
+    
         previus = previus_dir(vfs, choose->item_name);
         previus->next_element = choose->next_element;
         free(choose);
@@ -263,11 +245,11 @@ int rm(vfs_t *vfs, char *name) {
     }
 
     return -1;
-
 }
 
 int info(vfs_t *vfs, char *name) {
-    if (!vfs | !name) {
+    if (!vfs | !name) 
+    {
         printf("ERROR!!");
         return -1;
     }
@@ -280,51 +262,52 @@ int info(vfs_t *vfs, char *name) {
         printf("Size of File: %d\n", choose->size);
         printf("%d", choose->start_cluster);
         index = next_index(vfs, choose->start_cluster);
-        if(index != FAT_FILE_END) {
+        if(index != FAT_FILE_END) 
+        {
             printf(", ");
         }
         while (index != FAT_FILE_END)
         {
             printf("%d", index);
             index = next_index(vfs, index);
-            if(index != FAT_FILE_END) {
+            if(index != FAT_FILE_END) 
+            {
                 printf(", ");
             }
         }
 
         printf("\n");
-
-        return 0;
-            
+        return 0;      
     } else {
         choose = search_directory(vfs, name);
         if(choose != NULL) {
             printf("%d", choose->start_cluster);
             index = next_index(vfs, choose->start_cluster);
-            if(index != FAT_FILE_END) {
+            if(index != FAT_FILE_END) 
+            {
                 printf(", ");
             }
-            while (index != FAT_FILE_END) {
+            while (index != FAT_FILE_END) 
+            {
                 printf("%d", index);
                 index = next_index(vfs, index);
-                if(index != FAT_FILE_END) {
+                if(index != FAT_FILE_END) 
+                {
                     printf(", ");
                 }
             }
 
-            printf("\n");
-                
+            printf("\n");    
             return 0;
         }
         
     }
-
     return -1;
-
 }
 
 int cat(vfs_t *vfs, char *name) {
-    if (!vfs | !name) {
+    if (!vfs | !name) 
+    {
         printf("ERROR!!");
         return -1;
     }
@@ -334,7 +317,6 @@ int cat(vfs_t *vfs, char *name) {
     
     choose = search_file(vfs, name);
     if(choose != NULL) {
-
         size_t i = 0;
         for (i = 0; i < CLUSTER_SIZE; i++)
         {
@@ -359,22 +341,21 @@ int cat(vfs_t *vfs, char *name) {
 
         printf("\n");
         return 0;
-
         }
 
     return -1;
-
 }
 
 
 int mv(vfs_t *vfs, directory_item *one, char *name_two) {
-    if (!vfs | !one | !name_two) {
+    if (!vfs | !one | !name_two) 
+    {
         printf("ERROR!!");
         return -1;
     }
 
-    if(strcmp(one->parent_name, vfs->current->item_name) == 0) {
-
+    if(strcmp(one->parent_name, vfs->current->item_name) == 0) 
+    {
         strcpy(one->item_name, name_two);
         printf("OK\n");
         return 0;   
@@ -388,7 +369,8 @@ int mv(vfs_t *vfs, directory_item *one, char *name_two) {
 }
 
 int cp(vfs_t *vfs, directory_item *one, char *name_two) {
-    if (!vfs | !one | !name_two) {
+    if (!vfs | !one | !name_two) 
+    {
         printf("ERROR!!");
         return -1;
     }
@@ -398,14 +380,16 @@ int cp(vfs_t *vfs, directory_item *one, char *name_two) {
     int index_one = 0;
     int index_previous = 0;
 
-
-    if(strcmp(vfs->current->item_name, one->parent_name) == 0) {
-        if(strcmp(one->item_name, name_two) == 0) {
+    if(strcmp(vfs->current->item_name, one->parent_name) == 0) 
+    {
+        if(strcmp(one->item_name, name_two) == 0) 
+        {
             printf("You copy similar file!!\n");
             return 0;
         } else {
 
-            if(one->size <= CLUSTER_SIZE) {
+            if(one->size <= CLUSTER_SIZE) 
+            {
                 index = seach_free_index(vfs);
                 vfs->fat_table1[index] = FAT_FILE_END;
                 current = vfs->all_elements;
@@ -460,13 +444,12 @@ int cp(vfs_t *vfs, directory_item *one, char *name_two) {
                 }
                 
                 return 0;
-
             }
 
         }
     } else {
-       
-        if(one->size <= CLUSTER_SIZE) {
+        if(one->size <= CLUSTER_SIZE) 
+        {
             index = seach_free_index(vfs);
             vfs->fat_table1[index] = FAT_FILE_END;
             current = vfs->all_elements;
@@ -488,7 +471,6 @@ int cp(vfs_t *vfs, directory_item *one, char *name_two) {
             memcpy(vfs->data_block[index], vfs->data_block[one->start_cluster], sizeof(char) * CLUSTER_SIZE);
             return 0;
         } else {
-
             index = seach_free_index(vfs);
             current = vfs->all_elements;
 
@@ -520,15 +502,14 @@ int cp(vfs_t *vfs, directory_item *one, char *name_two) {
             }
                 
         return 0;
-
         }
     }
-
     return -1;
 }
 
 int incp(vfs_t *vfs, char *input_file, char *file_name) {
-    if (!vfs | !input_file | !file_name) {
+    if (!vfs | !input_file | !file_name) 
+    {
         printf("ERROR!!");
         return -1;
     }
@@ -558,7 +539,8 @@ int incp(vfs_t *vfs, char *input_file, char *file_name) {
     rewind(fp);
 
     read_byte = fread(file, sizeof(char), size, fp);
-    if(read_byte != size) {
+    if(read_byte != size) 
+    {
         printf("Chyba 1\n");
         return -1;
     }
@@ -575,7 +557,8 @@ int incp(vfs_t *vfs, char *input_file, char *file_name) {
     }
 
     current->next_element = (directory_item *)malloc(sizeof(directory_item));
-    if(current->next_element == NULL) {
+    if(current->next_element == NULL) 
+    {
         printf("Chyba 2");
         return -2;
     }
@@ -593,7 +576,6 @@ int incp(vfs_t *vfs, char *input_file, char *file_name) {
     for (i = 0; i < size; i++)
     {
         vfs->data_block[index][counter] = file[i];
-
         if(counter == (CLUSTER_SIZE - 1)) {
             index = seach_free_index(vfs);
             vfs->fat_table1[index_previus] = index;
@@ -609,13 +591,12 @@ int incp(vfs_t *vfs, char *input_file, char *file_name) {
 
     fclose(fp);
     fp = NULL;
-
     return 0;
-
 }
 
 int outcp(vfs_t *vfs, char *file_name, char *output_file) {
-    if (!vfs | !file_name | !output_file) {
+    if (!vfs | !file_name | !output_file) 
+    {
         printf("ERROR!!");
         return -1;
     }
@@ -629,11 +610,8 @@ int outcp(vfs_t *vfs, char *file_name, char *output_file) {
     
 
     fp = fopen(output_file, "wb");
-
     current = search_file(vfs, file_name);
-
     file = (char *)malloc(sizeof(char) * current->size);
-
     index = current->start_cluster;
 
     int i = 0;
@@ -661,7 +639,8 @@ int outcp(vfs_t *vfs, char *file_name, char *output_file) {
 }
 
 int shortf(vfs_t *vfs, char *name) {
-    if (!vfs | !name) {
+    if (!vfs | !name) 
+    {
         printf("ERROR!!");
         return -1;
     }
@@ -672,7 +651,8 @@ int shortf(vfs_t *vfs, char *name) {
 
     current = search_file(vfs, name);
 
-    if(current->size <= CLUSTER_SIZE) {
+    if(current->size <= CLUSTER_SIZE) 
+    {
         return 0;
     }
 
@@ -680,7 +660,6 @@ int shortf(vfs_t *vfs, char *name) {
     vfs->fat_table1[current->start_cluster] = FAT_FILE_END;
     current->size = CLUSTER_SIZE;
     index_previus = index;
-
 
     while (index != FAT_FILE_END)
     {
@@ -694,7 +673,8 @@ int shortf(vfs_t *vfs, char *name) {
 }
 
 int xcp(vfs_t *vfs, directory_item *one, directory_item *two, char *name) {
-    if (!vfs | !one | !two | !name) {
+    if (!vfs | !one | !two | !name) 
+    {
         printf("ERROR!!");
         return -1;
     }
@@ -707,7 +687,8 @@ int xcp(vfs_t *vfs, directory_item *one, directory_item *two, char *name) {
 
     current = vfs->all_elements;
 
-        while (current->next_element != NULL) {
+        while (current->next_element != NULL) 
+        {
             current = current->next_element;
         }
 
@@ -717,7 +698,8 @@ int xcp(vfs_t *vfs, directory_item *one, directory_item *two, char *name) {
     current->next_element->size = (one->size + two->size);
     strcpy(current->next_element->parent_name, vfs->current->item_name);
 
-    if(one->size <= CLUSTER_SIZE) {
+    if(one->size <= CLUSTER_SIZE) 
+    {
         index = seach_free_index(vfs);
         vfs->fat_table1[index] = FAT_FILE_END;
         index_previous = index;
@@ -741,7 +723,8 @@ int xcp(vfs_t *vfs, directory_item *one, directory_item *two, char *name) {
         index_previous = index;
         index_one = vfs->fat_table1[one->start_cluster];
 
-        while(index_one != FAT_FILE_END) {
+        while(index_one != FAT_FILE_END) 
+        {
             index = seach_free_index(vfs);
             vfs->fat_table1[index_previous] = index;
             vfs->fat_table1[index] = FAT_FILE_END;
@@ -751,7 +734,8 @@ int xcp(vfs_t *vfs, directory_item *one, directory_item *two, char *name) {
         }
     }
 
-    if(two->size <= CLUSTER_SIZE) {
+    if(two->size <= CLUSTER_SIZE) 
+    {
         index = seach_free_index(vfs);
         vfs->fat_table1[index] = FAT_FILE_END;
         vfs->fat_table1[index_previous] = index;
@@ -760,9 +744,7 @@ int xcp(vfs_t *vfs, directory_item *one, directory_item *two, char *name) {
         memcpy(vfs->data_block[index], vfs->data_block[two->start_cluster], sizeof(char) * CLUSTER_SIZE);
 
     } else {
-
         index = seach_free_index(vfs);
-
         vfs->fat_table1[index] = FAT_FILE_END;
         vfs->fat_table1[index_previous] = index;
         memcpy(vfs->data_block[index], vfs->data_block[two->start_cluster], sizeof(char) * CLUSTER_SIZE);
@@ -770,7 +752,8 @@ int xcp(vfs_t *vfs, directory_item *one, directory_item *two, char *name) {
         index_previous = index;
         index_two = vfs->fat_table1[two->start_cluster];
 
-        while(index_one != FAT_FILE_END) {
+        while(index_one != FAT_FILE_END) 
+        {
             index = seach_free_index(vfs);
             vfs->fat_table1[index_previous] = index;
             vfs->fat_table1[index] = FAT_FILE_END;
@@ -785,7 +768,8 @@ int xcp(vfs_t *vfs, directory_item *one, directory_item *two, char *name) {
 }
 
 int load(vfs_t *vfs, char *file_name) {
-    if (!vfs | !file_name) {
+    if (!vfs | !file_name) 
+    {
         printf("ERROR!!");
         return -1;
     }
@@ -804,10 +788,8 @@ int load(vfs_t *vfs, char *file_name) {
     bool end = true;
 
     current_folder = vfs->current;
-
-    printf("%s\n", file_name);
-
     fp = fopen(file_name, "r");
+    printf("%s\n", file_name);
 
     if(fp != NULL) {
         return -1;
@@ -816,7 +798,8 @@ int load(vfs_t *vfs, char *file_name) {
     while (fgets(line, 1024, fp))
     {
         command = strtok(line, " ");
-        if(strcmp(command, "mkdir") == 0) {
+        if(strcmp(command, "mkdir") == 0) 
+        {
 
             argument1 = strtok(NULL, "\0");
             result = path(vfs, argument1);
@@ -840,12 +823,13 @@ int load(vfs_t *vfs, char *file_name) {
             vfs->current = current_folder;
             
 
-        } else if(strcmp(command,"cd") == 0) {
-
+        } else if(strcmp(command,"cd") == 0) 
+        {
             argument1 = strtok(NULL, "\0");
             result = path(vfs ,argument1);
             
-            if(strcmp(result, "NPF") == 0) {
+            if(strcmp(result, "NPF") == 0) 
+            {
                 printf("PATH NOT FOUND (neexistující cesta)\n");
                 end = false;
                 break;
@@ -861,8 +845,8 @@ int load(vfs_t *vfs, char *file_name) {
                 cd(vfs, result);
             }
 
-        } else if(strcmp(command, "rmdir") == 0) {
-
+        } else if(strcmp(command, "rmdir") == 0) 
+        {
             argument1 = strtok(NULL, "\0");
             result = path(vfs ,argument1);
             if(strcmp(result, "NPF") == 0) {
@@ -890,19 +874,19 @@ int load(vfs_t *vfs, char *file_name) {
                     break;
                 }
             }
-
             vfs->current = current_folder;
-
         } else if(strcmp(command, "rm") == 0) {
 
             argument1 = strtok(NULL, "\0");
             result = path(vfs, argument1);
             
-            if(strcmp(result, "NPF") == 0) {
+            if(strcmp(result, "NPF") == 0) 
+            {
                 printf("FILE NOT FOUND\n");
                 end = false;
                 break;
-            } else if(search_file(vfs, result) == NULL) {
+            } else if(search_file(vfs, result) == NULL) 
+            {
                 printf("FILE NOT FOUND\n");
                 end = false;
                 break;
@@ -917,14 +901,9 @@ int load(vfs_t *vfs, char *file_name) {
             }
 
             vfs->current = current_folder;
-
-            
-
         } else if(strcmp(command, "info") == 0) {
-
             argument1 = strtok(NULL, "\0");
             result = path(vfs, argument1);
-
             if(strcmp(result, "NPF") == 0) {
                 printf("FILE NOT FOUND (není zdroj)\n");
                 end = false;
@@ -940,7 +919,6 @@ int load(vfs_t *vfs, char *file_name) {
             vfs->current = current_folder;
 
         } else if(strcmp(command, "cat") == 0) {
-
             argument1 = strtok(NULL, "\0");
             result = path(vfs, argument1);
             if(strcmp(result, "NPF") == 0) {
@@ -962,7 +940,6 @@ int load(vfs_t *vfs, char *file_name) {
             vfs->current = current_folder;
 
         } else if(strcmp(command, "mv") == 0) {
-
             argument1 = strtok(NULL, " ");
             argument2 = strtok(NULL, "\0");
             result = path(vfs ,argument1);
@@ -996,7 +973,6 @@ int load(vfs_t *vfs, char *file_name) {
             vfs->current = current_folder;  
 
         } else if(strcmp(command, "cp") == 0) {
-
             argument1 = strtok(NULL, " ");
             argument2 = strtok(NULL, "\0");
             result = path(vfs ,argument1);
@@ -1042,7 +1018,6 @@ int load(vfs_t *vfs, char *file_name) {
 
         } else if(strcmp(command, "ls") == 0) {
             argument1 = strtok(NULL, "\0");
-
             result = path(vfs, argument1);
             if(strcmp(result, "NPF") == 0) {
                 printf("PATH NOT FOUND (neexistující adresář)");
@@ -1057,12 +1032,9 @@ int load(vfs_t *vfs, char *file_name) {
                 ls(vfs, vfs->current);
             }
         } else if(strcmp(command, "incp") == 0) {
-
             int rest = 0;
             argument1 = strtok(NULL, " ");
-
             argument2 = strtok(NULL, "\0");
-
             result = path(vfs, argument2);
 
             if(strcmp(result, "NPF") == 0) {
@@ -1073,8 +1045,7 @@ int load(vfs_t *vfs, char *file_name) {
                 printf("PATH NOT FOUND (neexistuje cílová cesta)\n");
                 end = false;
                 break;
-            } else {
-                
+            } else { 
                 rest = incp(vfs, argument1, result);
                 if(rest == -1) {
                     printf("FILE NOT FOUND (není zdroj)\n");
@@ -1092,13 +1063,9 @@ int load(vfs_t *vfs, char *file_name) {
             vfs->current = current_folder;
 
         } else if(strcmp(command, "outcp") == 0) {
-
             int rest = 0;
-
             argument1 = strtok(NULL, " ");
-
             result = path(vfs, argument1);
-
             argument2 = strtok(NULL, "\0");
 
             if(strcmp(result, "NPF") == 0) {
@@ -1110,98 +1077,34 @@ int load(vfs_t *vfs, char *file_name) {
                 end = false;
                 break;
             } else {
-
                 rest = outcp(vfs, result, argument2);
                 if(rest == 0) {
                     printf("OK\n");
                 }
             }
-
             vfs->current = current_folder;
 
-
-        } else if(strcmp(command, "short") == 0) {
-
-            argument1 = strtok(NULL, "\0");
-
-            result = path(vfs, argument1);
-
-            if(strcmp(result, "NPF") == 0) {
-                printf("FILE NOT FOUND (není zdroj)\n");
-                end = false;
-                break;
-            } else if(search_file(vfs, result) == NULL) { 
-                printf("FILE NOT FOUND (není zdroj)\n");
-                end = false;
-                break;
-            } else {
-
-                if(shortf(vfs, result) == 0) {
-                    printf("OK\n");
-                }
+        } else if(strcmp(command, "check") == 0) {
+            if(check(vfs) == 1) {
+                printf("OK\n");
+            } else if(check(vfs) == -1) {
+                printf("ERROR\n");
             }
 
             vfs->current = current_folder;
-        } else if(strcmp(command, "xcp") == 0) {
 
-            argument1 = strtok(NULL, " ");
-            argument2 = strtok(NULL, " ");
-            argument3 = strtok(NULL, "\0");
+        } else if(strcmp(command, "bug") == 0) {
+            argument1 = strtok(NULL, "\0");
+            if(bug(vfs, argument1) == 0) {
+                printf("OK\n");
+            } else if(bug(vfs, argument1) == -1) {
+                printf("FILE NOT FOUND\n");
+            }
 
-            result = path(vfs, argument1);
+            vfs->current = current_folder;
 
-            if(strcmp(result, "NPF") == 0) {
-                printf("FILE NOT FOUND (není zdroj)\n");
-                end = false;
-                break;
-            } else if(search_file(vfs, result) == NULL) {
-                printf("FILE NOT FOUND (není zdroj)\n");
-                end = false;
-                break;
-            } else {
-                one = search_file(vfs, result);
-                vfs->current = current_folder;
-                result = NULL;
-                result = path(vfs, argument2);
-
-                if(strcmp(result, "NPF") == 0) {
-                    printf("FILE NOT FOUND (není zdroj)\n");
-                    end = false;
-                    break;
-                } else if(search_file(vfs, result) == NULL) {
-                    printf("FILE NOT FOUND (není zdroj)\n");
-                    end = false;
-                    break;
-                } else {
-                    two = search_file(vfs, result);
-                    vfs->current = current_folder;
-                    result = NULL;
-                    result = path(vfs, argument3);
-
-                    if(strcmp(result, "NPF") == 0) {
-                        printf("PATH NOT FOUND (neexistuje cílová cesta)\n");
-                        end = false;
-                        break;
-                    } else if(search_file(vfs, result) != NULL) {
-                        rm(vfs, result);
-                        if(xcp(vfs, one, two, result) == 0) {
-                            printf("OK\n");
-                        } else {
-                            printf("PATH NOT FOUND (neexistuje cílová cesta)\n");
-                            end = false;
-                            break;
-                        }
-                    } else {
-                        if(xcp(vfs, one, two, result) == 0) {
-                            printf("OK\n");
-                        } else {
-                            printf("PATH NOT FOUND (neexistuje cílová cesta)\n");
-                            end = false;
-                            break;
-                        }
-                    }                          
-                }
-            }       
+        } else {
+            printf("Command not found\n");
         }
     }
 
@@ -1214,7 +1117,8 @@ int load(vfs_t *vfs, char *file_name) {
 }
 
 vfs_t *format(vfs_t *vfs, int size) {
-    if (!vfs | size <= 0) {
+    if (!vfs | size <= 0) 
+    {
         printf("ERROR!!");
         return -1;
     }
@@ -1241,8 +1145,8 @@ vfs_t *format(vfs_t *vfs, int size) {
 
     memset(vfs->data_block, 0, sizeof(char) * vfs->superblock->fat_count);
     free(vfs->data_block);
-    vfs->data_block = NULL;
 
+    vfs->data_block = NULL;
     vfs->current = NULL;
 
     free_directory = vfs->all_elements;
@@ -1266,8 +1170,7 @@ vfs_t *format(vfs_t *vfs, int size) {
     vfs->superblock->fat_count = (size / CLUSTER_SIZE);
     vfs->superblock->fat1_start_address = sizeof(superblock_t);
     vfs->superblock->fat2_start_address = vfs->superblock->fat1_start_address + (vfs->superblock->fat_count * sizeof(int));
-    vfs->superblock->data_start_address = vfs->superblock->fat2_start_address + (vfs->superblock->fat_count * sizeof(int));
-    
+    vfs->superblock->data_start_address = vfs->superblock->fat2_start_address + (vfs->superblock->fat_count * sizeof(int)); 
     
     fat_table1 = (int *)malloc(vfs->superblock->fat_count * sizeof(int));
     if(fat_table1 == NULL) {
@@ -1289,7 +1192,8 @@ vfs_t *format(vfs_t *vfs, int size) {
     }
 
     i = 0;
-    for (int i = 0; i < vfs->superblock->fat_count; i++) {
+    for (int i = 0; i < vfs->superblock->fat_count; i++) 
+    {
 
         fat_table1[i] = FAT_UNUSED;
         fat_table2[i] = FAT_UNUSED;
@@ -1322,8 +1226,6 @@ vfs_t *format(vfs_t *vfs, int size) {
         free(vfs);
         return NULL;
     }
-
-
     
     fat_table1[0] = FAT_FILE_END;
     fat_table2[0] = FAT_FILE_END;

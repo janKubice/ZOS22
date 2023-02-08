@@ -43,7 +43,7 @@ vfs_t *init_vfs(vfs_t *vfs, int size) {
         free(vfs);
         return NULL;    
     }
-    strcpy(vfs->superblock->signature, "Daniel Cifka");
+    strcpy(vfs->superblock->signature, "Jan Kubice");
     vfs->superblock->disk_size = size;
     vfs->superblock->cluster_size = CLUSTER_SIZE;
     vfs->superblock->cluster_count = (size / CLUSTER_SIZE);
@@ -445,72 +445,6 @@ void commands_loop(vfs_t *vfs, bool *continue_w) {
             vfs->current = current_folder;
 
 
-        } else if(strcmp(command, "short") == 0) {
-
-            argument1 = strtok(NULL, "\0");
-
-            result = path(vfs, argument1);
-
-            if(strcmp(result, "NPF") == 0) {
-                printf("FILE NOT FOUND (není zdroj)\n");
-            } else if(search_file(vfs, result) == NULL) { 
-                printf("FILE NOT FOUND (není zdroj)\n");
-            } else {
-
-                if(shortf(vfs, result) == 0) {
-                    printf("OK\n");
-                }
-            }
-
-            vfs->current = current_folder;
-        } else if(strcmp(command, "xcp") == 0) {
-
-            argument1 = strtok(NULL, " ");
-            argument2 = strtok(NULL, " ");
-            argument3 = strtok(NULL, "\0");
-
-            result = path(vfs, argument1);
-
-            if(strcmp(result, "NPF") == 0) {
-                printf("FILE NOT FOUND (není zdroj)\n");
-            } else if(search_file(vfs, result) == NULL) {
-                printf("FILE NOT FOUND (není zdroj)\n");
-            } else {
-                one = search_file(vfs, result);
-                vfs->current = current_folder;
-                result = NULL;
-                result = path(vfs, argument2);
-
-                if(strcmp(result, "NPF") == 0) {
-                    printf("FILE NOT FOUND (není zdroj)\n");
-                } else if(search_file(vfs, result) == NULL) {
-                    printf("FILE NOT FOUND (není zdroj)\n");
-                } else {
-                    two = search_file(vfs, result);
-                    vfs->current = current_folder;
-                    result = NULL;
-                    result = path(vfs, argument3);
-
-                    if(strcmp(result, "NPF") == 0) {
-                        printf("PATH NOT FOUND (neexistuje cílová cesta)\n");
-                    } else if(search_file(vfs, result) != NULL) {
-                        rm(vfs, result);
-                        if(xcp(vfs, one, two, result) == 0) {
-                            printf("OK\n");
-                        } else {
-                            printf("PATH NOT FOUND (neexistuje cílová cesta)\n");
-                        }
-                    } else {
-                        if(xcp(vfs, one, two, result) == 0) {
-                            printf("OK\n");
-                        } else {
-                            printf("PATH NOT FOUND (neexistuje cílová cesta)\n");
-                        }
-                    }                          
-                }
-            }
-
-            vfs->current = current_folder;     
         } else if(strcmp(command, "load") == 0) {
             argument1 = strtok(NULL, "\0");
 
@@ -570,6 +504,8 @@ void commands_loop(vfs_t *vfs, bool *continue_w) {
 
             vfs->current = current_folder;
 
+        } else {
+            printf("Command not found\n");
         }
     }
 }

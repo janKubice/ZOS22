@@ -53,47 +53,6 @@ int main(int argc, char const *argv[])
                     current = current->next_element;
                 }
                 
-                /*while (direc_read)
-                {
-                    direc_read = (directory_item *)malloc(sizeof(directory_item));
-                    fread(direc_read, sizeof(directory_item), 1, fp);
-                    next = vfs->all_elements->next_element;
-                    while (next)
-                    {
-                        next = next->next_element;
-                    }
-                    next->next_element = direc_read;
-                }*/
-                
-                
-
-
-                /*fclose(fp);
-                printf("Soubor s filesystemem nebyl nalezen,spustime funkci format pro tvorbu filesystemu\n");
-                printf("Velikost jednosho clusteru je 5000B\n");
-                printf("Zadejte velikost disku ve formatu <velikost> <MB,GB>: ");
-                getline(&input_argument, &len_a, stdin);
-                for (size_t i = 0; i < strlen(input_argument); i++)
-                {
-                    if((input_argument[i] == 'M') && (input_argument[i + 1] == 'B')) {
-                        unit = (char *)malloc(sizeof(char) * i);
-                        size = atoi(strncpy(unit, input_argument, i));
-                        size = size * 1000000;
-                        break;
-                    }
-                    if((input_argument[i] == 'G') && (input_argument[i + 1] == 'B')) {
-                        unit = (char *)malloc(sizeof(char) * i);
-                        size = atoi(strncpy(unit, input_argument, i));
-                        size = size * 1000000000;
-                        break;
-                    }
-                }
-                
-                free(unit);
-                vfs = init_vfs(vfs, size);
-                if(!vfs) {
-                    return -1;
-                }*/
                 vfs->file = argv[1];
 
                 while(continue_w) {
@@ -122,13 +81,7 @@ int main(int argc, char const *argv[])
                     }
                 }
                 
-                free(unit);
-                /*if(strcmp(unit, "MB") == 0){
-                    size = size * 1000000;
-                } else if(strcmp(unit, "GB") == 0) {
-                    size = size * 1000000000;
-                }*/
-                
+                free(unit);         
                 vfs = init_vfs(vfs, size);
 
                 if(vfs != NULL) {
